@@ -19,12 +19,11 @@ The syntax for the macro is just a simple JSON structure
     }
 }
 ```
-### Unspecified Version
 ```rust
 use fflag_proc_macro::include_fflags;
 
 include_fflags! {
-    "version": "latest",
+    "version": "latest", // or "version-e2728ac197f84660"
     "flags": {
         "DebugStudioAssertsAlwaysBreak": "DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK",
         "HttpPointsReporterUrl": "HTTP_POINTS_REPORTER_URL"
@@ -32,27 +31,7 @@ include_fflags! {
 }
 
 fn main() {
-    println!("{}", DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK);
-    println!("{}", HTTP_POINTS_REPORTER_URL);
+    assert_eq!(DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK, false);
+    assert_eq!(tHTTP_POINTS_REPORTER_URL, "https://client-telemetry.roblox.com");
 }
 ```
-
-### Specified Version
-```rust
-use fflag_proc_macro::include_fflags;
-
-include_fflags! {
-    "version": "version-e2728ac197f84660",
-    "flags": {
-        "DebugStudioAssertsAlwaysBreak": "DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK",
-        "HttpPointsReporterUrl": "HTTP_POINTS_REPORTER_URL"
-    }
-}
-
-fn main() {
-    println!("{}", DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK);
-    println!("{}", HTTP_POINTS_REPORTER_URL);
-}
-
-```
-
