@@ -1,0 +1,21 @@
+[package]
+name = "fflag-proc-macro"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[[example]]
+name = "example"
+crate-type = [ "bin" ]
+
+[dependencies]
+attohttpc = "0.28.0"
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+object = "0.35.0"
+serde = { version = "1.0.198", features = ["derive"] }
+serde_derive = "1.0.198"
+serde_json = "1.0.116"
+zip = { version = "1.1.1", features = ["deflate64", "deflate"] }
