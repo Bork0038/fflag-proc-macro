@@ -15,7 +15,8 @@ The syntax for the macro is just a simple JSON structure
         // FFLAG_VAR_NAME = name in code
         "FFlagName": "FFLAG_VAR_NAME" 
     }
-}```
+}
+```
 ### Unspecified Version
 ```rust
 use fflag_proc_macro::include_fflags;
@@ -32,8 +33,8 @@ fn main() {
     println!("{}", DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK);
     println!("{}", HTTP_POINTS_REPORTER_URL);
 }
-
 ```
+
 ### Specified Version
 ```rust
 use fflag_proc_macro::include_fflags;
