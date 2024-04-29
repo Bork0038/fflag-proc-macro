@@ -3,6 +3,8 @@
 
 A simple procedural macro for rust that loads FFlag values from Roblox Studio builds into your code.
 
+Code is a bit scuffed but idrc.
+
 ## IMPORTANT
 Some FFlag values are not initialized in the Studio binary and will panic when loaded by the macro.
 ## Usage/Examples
