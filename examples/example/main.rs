@@ -10,6 +10,6 @@ include_fflags! {
 }
 
 fn main() {
-    println!("{}", DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK);
-    println!("{}", HTTP_POINTS_REPORTER_URL);
+    assert_eq!(DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK, false);
+    assert_eq!(HTTP_POINTS_REPORTER_URL, "https://client-telemetry.roblox.com");
 }
