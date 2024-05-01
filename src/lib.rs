@@ -60,19 +60,19 @@ fn include_fflags_internal(item: TokenStream) -> Result<TokenStream, Box<dyn Err
             FastVarValue::Invalid => panic!("Invalid FastVarValue"),
             FastVarValue::Uninit => panic!("FastVar {} not in initialized memory", flag.name),
 
-            FastVarValue::Flag(flag) => format!("const {}: bool = {};", var_name, flag),
+            FastVarValue::Flag(flag) => format!("pub const {}: bool = {};", var_name, flag),
             FastVarValue::Int(int) => format!(
-                "const {}: u32 = {};",
+                "pub const {}: u32 = {};",
                 var_name,
                 Literal::u32_unsuffixed(int)
             ),
             FastVarValue::Log(log) => format!(
-                "const {}: u16 = {};",
+                "pub const {}: u16 = {};",
                 var_name,
                 Literal::u16_unsuffixed(log)
             ),
             FastVarValue::String(str) => {
-                format!("const {}: &str = {};", var_name, Literal::string(&str))
+                format!("pub const {}: &str = {};", var_name, Literal::string(&str))
             }
         };
 
