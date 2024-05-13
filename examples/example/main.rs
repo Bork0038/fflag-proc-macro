@@ -11,5 +11,5 @@ include_fflags! {
 
 fn main() {
     assert_eq!(DEBUG_STUDIO_ASSERTS_ALWAYS_BREAK, false);
-    assert_eq!(HTTP_POINTS_REPORTER_URL, "https://client-telemetry.roblox.com");
+    assert_eq!(HTTP_POINTS_REPORTER_URL,"https://client-telemetry.roblox.com");
 }

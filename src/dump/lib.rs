@@ -61,9 +61,9 @@ impl Serialize<FastVarValueType> for FastVarValueType {
 #[derive(Clone)]
 pub enum FastVarValue {
     Invalid,
-    Log(u16),
+    Log(String),
     String(String),
-    Int(u32),
+    Int(i32),
     Flag(bool),
     Uninit,
 }
@@ -92,7 +92,7 @@ impl Serialize<FastVarValue> for FastVarValue {
             FastVarValueType::Int => FastVarValue::Int(stream.read_le()?),
             FastVarValueType::Flag => FastVarValue::Flag(stream.read_bool()?),
             FastVarValueType::String => FastVarValue::String(stream.read_string_le::<u32>()?),
-            FastVarValueType::Log => FastVarValue::Log(stream.read_le()?),
+            FastVarValueType::Log => FastVarValue::Log(stream.read_string_le::<u32>()?),
         };
 
         Ok(value)
@@ -116,7 +116,7 @@ impl Serialize<FastVarValue> for FastVarValue {
             }
             FastVarValue::Log(log) => {
                 stream.write(&mut FastVarValueType::Log)?;
-                stream.write_le(log);
+                stream.write_string_le::<u32>(&log)?;
             }
         }
 
