@@ -172,7 +172,7 @@ pub fn get_fflags(binary: Vec<u8>) -> Result<Vec<FastVar>, Box<dyn Error>> {
                     FastVarValue::Uninit
                 } else {
                     let value =
-                        i32::from_le_bytes((&data_data[val_rva..val_rva + 4]).try_into().unwrap());
+                        u32::from_le_bytes((&data_data[val_rva..val_rva + 4]).try_into().unwrap());
 
                     FastVarValue::Int(value)
                 }
@@ -185,7 +185,7 @@ pub fn get_fflags(binary: Vec<u8>) -> Result<Vec<FastVar>, Box<dyn Error>> {
                     let value =
                         u16::from_le_bytes((&data_data[val_rva..val_rva + 2]).try_into().unwrap());
 
-                    FastVarValue::Log(value.to_string())
+                    FastVarValue::Log(value)
                 }
             }
 

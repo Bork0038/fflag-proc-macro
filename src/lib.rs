@@ -15,48 +15,12 @@ fn default_version() -> String {
     "latest".into()
 }
 
-fn default_flags() -> HashMap<String, String> {
-    HashMap::new()
-}
-
 #[derive(Deserialize)]
 struct Input {
     #[serde(default = "default_version")]
     version: String,
 
-    #[serde(default = "default_flags")]
     flags: HashMap<String, String>,
-
-    #[serde(default = "default_flags")]
-    dynamic_flags: HashMap<String, String>,
-}
-
-fn flag_to_token(
-    flags: &mut HashMap<String, FastVar>, 
-    name: &String,
-    var_name: &String
-) -> String {
-    let flag = match flags.get(name) {
-        Some(flag) => flag,
-        None => panic!("Failed to find flag {} in binary", name),
-    };
-
-    match flag.value.clone() {
-        FastVarValue::Invalid => panic!("Invalid FastVarValue"),
-        FastVarValue::Uninit => panic!("FastVar {} not in initialized memory", flag.name),
-
-        FastVarValue::Flag(flag) => format!("pub const {}: bool = {};", var_name, flag),
-        FastVarValue::Int(int) => format!(
-            "pub const {}: i32 = {};",
-            var_name,
-            Literal::i32_unsuffixed(int)
-        ),
-        FastVarValue::Log(log) =>
-            format!("pub const {}: &str = {};", var_name, Literal::string(&log)),
-
-        FastVarValue::String(str) =>
-            format!("pub const {}: &str = {};", var_name, Literal::string(&str))
-    }
 }
 
 fn include_fflags_internal(item: TokenStream) -> Result<TokenStream, Box<dyn Error>> {
@@ -70,7 +34,7 @@ fn include_fflags_internal(item: TokenStream) -> Result<TokenStream, Box<dyn Err
     };
 
     // read fflags if cached
-    let mut flags = match cache::get_fflags_if_version_cached(&version)? {
+    let flags = match cache::get_fflags_if_version_cached(&version)? {
         Some(flags) => flags,
         None => {
             let binary = api::get_binary(version.clone())?;
@@ -85,17 +49,33 @@ fn include_fflags_internal(item: TokenStream) -> Result<TokenStream, Box<dyn Err
         }
     };
 
-    let mut dynamic_flags = api::get_dynamic_flags()?;
-
     let mut tokens = Vec::new();
-
     for (real_name, var_name) in input.flags {
-        let token = flag_to_token(&mut flags, &real_name, &var_name); 
-        tokens.push(token);
-    }
+        let flag = match flags.get(&real_name) {
+            Some(flag) => flag,
+            None => panic!("Failed to find flag {} in binary", real_name),
+        };
 
-    for (real_name, var_name) in input.dynamic_flags {
-        let token = flag_to_token(&mut dynamic_flags, &real_name, &var_name);
+        let token = match flag.value.clone() {
+            FastVarValue::Invalid => panic!("Invalid FastVarValue"),
+            FastVarValue::Uninit => panic!("FastVar {} not in initialized memory", flag.name),
+
+            FastVarValue::Flag(flag) => format!("pub const {}: bool = {};", var_name, flag),
+            FastVarValue::Int(int) => format!(
+                "pub const {}: u32 = {};",
+                var_name,
+                Literal::u32_unsuffixed(int)
+            ),
+            FastVarValue::Log(log) => format!(
+                "pub const {}: u16 = {};",
+                var_name,
+                Literal::u16_unsuffixed(log)
+            ),
+            FastVarValue::String(str) => {
+                format!("pub const {}: &str = {};", var_name, Literal::string(&str))
+            }
+        };
+
         tokens.push(token);
     }
 
