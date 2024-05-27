@@ -135,8 +135,16 @@ pub fn get_fflags(binary: Vec<u8>) -> Result<Vec<FastVar>, Box<dyn Error>> {
         stream.ignore_bytes(2);
         let fvar_type: FastVarType = stream.read()?;
 
+        // dynamic fflag value pointers are into virtual memory
+        // let value_rva = if fvar_type == FastVarType::Dynamic {
+        //     stream.ignore_bytes(7);
+        //     0
+        // } else {
+        //     stream.ignore_bytes(3);
+        //     calc_instruction_offset(&mut stream, addr, text_rva, data_rva)?
+        // };
         stream.ignore_bytes(3);
-        let val_rva = calc_instruction_offset(&mut stream, addr, text_rva, data_rva)?;
+        let value_rva = calc_instruction_offset(&mut stream, addr, text_rva, data_rva)?;
 
         let fvar_name = {
             stream.ignore_bytes(3);
@@ -147,14 +155,16 @@ pub fn get_fflags(binary: Vec<u8>) -> Result<Vec<FastVar>, Box<dyn Error>> {
             )
         };
 
-        let fvar_val_type = {
+        let mut fvar_val_type = {
             stream.ignore_bytes(1);
 
             let jmp_rva = calc_instruction_offset(&mut stream, addr, text_rva, text_rva)?;
             let mut jmp_data = NetworkStream::from(text_data[jmp_rva..jmp_rva + 0x3D].to_vec());
 
             let inst: u16 = jmp_data.read_be()?;
-            let offset = if inst == 0x40_53 { 35 } else { 15 };
+            let offset = 
+                if inst == 0x40_53 { 35 } 
+                else { 15 };
 
             jmp_data.ignore_bytes(offset);
             let sub_jmp_rva = calc_instruction_offset(&mut jmp_data, jmp_rva, text_rva, text_rva)?;
@@ -166,39 +176,26 @@ pub fn get_fflags(binary: Vec<u8>) -> Result<Vec<FastVar>, Box<dyn Error>> {
             sub_jmp_stream.read::<FastVarValueType>()?
         };
 
+        let value_size = fvar_val_type.get_size();
+        if value_rva + value_size >= data_size - 1 {
+            vec.push(FastVar {
+                name: fvar_name,
+                var_type: fvar_type,
+                value_type: fvar_val_type,
+                value: FastVarValue::Uninit
+            });
+
+            continue
+        }
+
+        let mut value_stream = NetworkStream::from(&data_data[value_rva..value_rva + value_size]);
         let fvar_value = match fvar_val_type {
-            FastVarValueType::Int => {
-                if val_rva + 4 > data_size {
-                    FastVarValue::Uninit
-                } else {
-                    let value =
-                        u32::from_le_bytes((&data_data[val_rva..val_rva + 4]).try_into().unwrap());
-
-                    FastVarValue::Int(value)
-                }
-            }
-
-            FastVarValueType::Log => {
-                if val_rva + 2 > data_size {
-                    FastVarValue::Uninit
-                } else {
-                    let value =
-                        u16::from_le_bytes((&data_data[val_rva..val_rva + 2]).try_into().unwrap());
-
-                    FastVarValue::Log(value)
-                }
-            }
-
-            FastVarValueType::Flag => {
-                if val_rva > data_size {
-                    FastVarValue::Uninit
-                } else {
-                    FastVarValue::Flag(data_data[val_rva] == 0x01)
-                }
-            }
+            FastVarValueType::Int => FastVarValue::Int(value_stream.read_le()?),
+            FastVarValueType::Log => FastVarValue::Log(value_stream.read_le()?),
+            FastVarValueType::Flag => FastVarValue::Flag(value_stream.read_bool()?),
 
             FastVarValueType::String => {
-                if let Some(value) = strings.get(&val_rva) {
+                if let Some(value) = strings.get(&value_rva) {
                     FastVarValue::String(value.clone())
                 } else {
                     FastVarValue::Uninit

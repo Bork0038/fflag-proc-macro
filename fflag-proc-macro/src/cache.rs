@@ -55,8 +55,8 @@ pub fn write_flags_to_cache(
     stream.write_string_le::<u8>(version)?;
     stream.write_le::<u16>(flags.len() as u16);
 
-    for mut flag in flags {
-        let mut flag = flag.1;
+    for flag in flags {
+        let flag = flag.1;
 
         stream.write(flag)?;
     }

@@ -1,11 +1,10 @@
 use object::{
     coff::CoffHeader,
     pe::{
-        ImageDataDirectory, ImageDosHeader, ImageFileHeader, ImageNtHeaders64,
-        ImageOptionalHeader64, ImageSectionHeader,
+        ImageDosHeader, ImageNtHeaders64,
+        ImageSectionHeader,
     },
-    read::pe::{ImageNtHeaders, ImageOptionalHeader, ImportTable},
-    LittleEndian,
+    read::pe::ImageNtHeaders,
 };
 use std::error::Error;
 

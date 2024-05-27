@@ -1,6 +1,7 @@
 use crate::stream::{NetworkStream, Serialize};
 use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::FromPrimitive;
+use strum_macros::AsRefStr;
 use std::error::Error;
 
 #[repr(u32)]
@@ -31,16 +32,32 @@ impl Serialize<FastVarType> for FastVarType {
     }
 }
 
+
 #[repr(u32)]
-#[derive(FromPrimitive, ToPrimitive, Clone, Debug, PartialEq, Copy)]
+#[derive(FromPrimitive, ToPrimitive, Clone, Debug, PartialEq, Copy, AsRefStr)]
 pub enum FastVarValueType {
     Invalid = 0x00,
-    Uninit = 0xFFFFFFFF,
 
     Log = 0x01,
     String = 0x02,
     Int = 0x03,
     Flag = 0x04,
+
+    Uninit = 0xFFFFFFFF,
+}
+
+impl FastVarValueType {
+    pub fn get_size(&mut self) -> usize {
+        match self {
+            FastVarValueType::String => 0,
+            FastVarValueType::Flag => 1,
+            FastVarValueType::Log => 2,
+            FastVarValueType::Int => 4,
+
+            FastVarValueType::Invalid => 0,
+            FastVarValueType::Uninit => 0
+        }
+    }
 }
 
 impl Serialize<FastVarValueType> for FastVarValueType {
@@ -57,6 +74,7 @@ impl Serialize<FastVarValueType> for FastVarValueType {
         Ok(())
     }
 }
+
 
 #[derive(Clone)]
 pub enum FastVarValue {
@@ -102,6 +120,7 @@ impl Serialize<FastVarValue> for FastVarValue {
         match self.clone() {
             FastVarValue::Invalid => stream.write(&mut FastVarValueType::Invalid)?,
             FastVarValue::Uninit => stream.write(&mut FastVarValueType::Uninit)?,
+
             FastVarValue::Int(val) => {
                 stream.write(&mut FastVarValueType::Int)?;
                 stream.write_le(val);
@@ -124,6 +143,7 @@ impl Serialize<FastVarValue> for FastVarValue {
     }
 }
 
+
 #[derive(Clone)]
 pub struct FastVar {
     pub name: String,
@@ -134,14 +154,12 @@ pub struct FastVar {
 
 impl Serialize<FastVar> for FastVar {
     fn read(stream: &mut NetworkStream) -> Result<FastVar, Box<dyn Error>> {
-        let var = FastVar {
+        Ok(FastVar {
             name: stream.read_string_le::<u32>()?,
             var_type: stream.read()?,
             value_type: stream.read()?,
-            value: stream.read()?,
-        };
-
-        Ok(var)
+            value: stream.read()?
+        })
     }
 
     fn write(&mut self, stream: &mut NetworkStream) -> Result<(), Box<dyn Error>> {
@@ -151,5 +169,16 @@ impl Serialize<FastVar> for FastVar {
         stream.write(&mut self.value)?;
 
         Ok(())
+    }
+}
+
+impl FastVar {
+    pub fn get_full_name(&self) -> String {
+        format!(
+            "{}F{}{}",
+            if self.var_type == FastVarType::Dynamic { "D" } else { "" },
+            self.value_type.as_ref(),
+            self.name
+        )
     }
 }

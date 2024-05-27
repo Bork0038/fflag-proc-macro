@@ -1,0 +1,22 @@
+[package]
+name = "fflag-proc-macro"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+attohttpc = "0.28.0"
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+object = "0.35.0"
+proc-macro2 = "1.0.83"
+quote = "1.0.36"
+serde = { version = "1.0.198", features = ["derive"] }
+serde_derive = "1.0.198"
+serde_json = "1.0.116"
+strum = { version = "0.26.2", features = ["derive"] }
+strum_macros = "0.26.2"
+syn = "2.0.66"
+zip = { version = "1.1.1", features = ["deflate64", "deflate"] }
