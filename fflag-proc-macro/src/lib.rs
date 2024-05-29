@@ -123,7 +123,7 @@ fn generate_base_flag_for_type(
     let token_prefix = flag.get_full_name();
 
     quote! {
-        static ref #token_name: #token_type = {
+        pub static ref #token_name: #token_type = {
             let flag = match FLAGS_INTERNAL_DO_NOT_USE.application_settings.get(#token_prefix) {
                 Some(flag) => flag,
                 None => match FLAGS_INTERNAL_DO_NOT_USE.application_settings.get(#real_name) {
@@ -187,7 +187,7 @@ fn include_fflags_runtime_internal(item: TokenStream) -> Result<TokenStream, Box
         let token_prefix = flag.get_full_name();
         let token = if flag.value_type == FastVarValueType::String {
             quote! {
-                static ref #token_name: &str = {
+                pub static ref #token_name: &str = {
                     match FLAGS_INTERNAL_DO_NOT_USE.application_settings.get(&#token_prefix) {
                         Some(flag) => flag,
                         None => match FLAGS_INTERNAL_DO_NOT_USE.application_settings.get(&#real_name) {
