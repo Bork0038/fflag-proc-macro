@@ -205,7 +205,7 @@ fn include_fflags_runtime_internal(item: TokenStream) -> Result<TokenStream, Box
     }
    
     let code = quote! {
-        use fflag_macro::{api, lazy_static};
+        use fflag_proc_macro::{api, lazy_static};
         use lazy_static::lazy_static;
 
         lazy_static! {
