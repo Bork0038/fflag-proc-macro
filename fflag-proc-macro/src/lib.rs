@@ -81,11 +81,9 @@ fn include_fflags_internal(item: TokenStream) -> Result<TokenStream, Box<dyn Err
             }
         };
 
-        println!("{}", token);
         tokens.extend(token);
     }
 
-    println!("{}", tokens);
     Ok(TokenStream::from(tokens))
 }
 
@@ -207,15 +205,13 @@ fn include_fflags_runtime_internal(item: TokenStream) -> Result<TokenStream, Box
     }
    
     let code = quote! {
+        use fflag_macro::{api, lazy_static};
         use lazy_static::lazy_static;
-        use fflag_macro::api;
 
         lazy_static! {
             #tokens
         }
     };
-
-    println!("{}", code);
 
     Ok(TokenStream::from(code))
 }
