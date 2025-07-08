@@ -17,8 +17,8 @@ The syntax for the macro is just a simple JSON structure
     }
 }
 ```
-### Static Flags
-Static FFlags have values which are not in the binary.
+### Dynamic Flags
+Dynamic FFlags have values which are not in the binary.
 They must be loaded via the include_fflags_runtime macro.
 Their values can be viewed at: https://clientsettingscdn.roblox.com/v2/settings/application/PCStudioApp
 
